@@ -1,5 +1,6 @@
 import React, { useRef, useState, useCallback } from "react";
-import VoiceRecorder from "@/components/VoiceRecorder";
+import AudioRecorder from "@/components/AudioRecorder";
+import Loader from "@/components/Loader";
 
 interface Conversation {
   role: string;
@@ -31,12 +32,13 @@ export default function Home() {
     return text.result;
   }
 
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+  // const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = async () => {
 
-    if (e.key === "Enter") {
+    if (value !== "") {
       setLoading(true);
 
-      const chatHistory: Conversation[] = [...conversation, { role: "user", content: value }];
+      let chatHistory: Conversation[] = [...conversation, { role: "user", content: value }];
       let chat: Conversation[] = [{ role: "system", content: "You are a travel assistant friend, who is a travel expert." }, ...chatHistory];
       
       const tokenCount = await fetch("/api/countTokens", {
@@ -60,6 +62,7 @@ export default function Home() {
         const userHistory: string = await summarize(userChat);
         const assistantHistory: string = await summarize(assistantChat);
         chat = [{ role: "user", content: userHistory }, { role: "assistant", content: assistantHistory }, { role: "user", content: value }];
+        chatHistory = chat;
       }
 
       const response = await fetch("/api/openAIChat", {
@@ -81,6 +84,10 @@ export default function Home() {
     setLoading(false);
   };
 
+  const handleTranscript = (transcript: string) => {
+    setValue(transcript);
+  }
+
   const handleRefresh = () => {
     inputRef.current?.focus();
     setValue("");
@@ -91,11 +98,12 @@ export default function Home() {
     <div className="w-full">
       <div className="flex flex-col items-center justify-center w-2/3 mx-auto mt-40 text-center">
         <h1 className="text-6xl text-slate-300">Hi there, I am EDA</h1>
-        <div className="my-12">
-          <div className="flex flex-col space-y-4 items-center">
+        <div className="my-12 w-auto">
+          <div className="flex flex-col space-y-4 items-center w-auto">
             <p className="mb-6 font-bold text-slate-300">Please type your query</p>
-            <input placeholder="Type Here" className="w-full max-w-xs input input-bordered input-ghost" value={value} onChange={handleInput} onKeyDown={handleKeyDown} />
-            <VoiceRecorder/>
+            <input placeholder="Type Here" className="w-full max-w-xs input input-bordered input-ghost" value={value} onChange={handleInput}/>
+            <AudioRecorder onTranscript={handleTranscript} />
+            <button className="btn btn-sm btn-accent my-10" onClick={handleKeyDown}>Submit</button>
             <button className="mx-auto mt-6 btn btn-primary btn-xs" onClick={handleRefresh} >
               Start New Conversation
             </button>
@@ -124,19 +132,7 @@ export default function Home() {
               </React.Fragment>
             ))}
           </div>
-          {
-            isLoading && 
-            <div>
-              <div className="modal modal-bottom modal-open">
-                <div className="alert alert-info shadow-lg w-1/3 mb-10 m-auto">
-                  <div>
-                    <progress className="progress w-64"></progress>
-                    <span className="ml-12">Please wait ... Processing your query</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
+          {isLoading && <Loader />}
         </div>
       </div>
     </div>
