@@ -30,8 +30,10 @@ const AudioRecorder = (props) => {
   }
 
   const stopRecording = async() => {
+
     setIsRecording(false);
     setLoading(true);
+
     recorder
     .stop()
     .getMp3()
@@ -41,12 +43,10 @@ const AudioRecorder = (props) => {
         lastModified: Date.now()
       });
       setBlobURL(URL.createObjectURL(file));
-      // Convert to base64
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = async function () {
         const base64data = reader.result;
-        // Only send the base64 string
         const base64String = base64data.split(',')[1];
         setAudio(base64String);
         const response = await fetch('/api/openAIAudio', {
@@ -67,6 +67,12 @@ const AudioRecorder = (props) => {
     setLoading(false);
   }
   
+  const handleSubmit = () => {
+    setAudio('');
+    setTranscription('');
+    props.onTranscript('');
+  }
+
   return (
     <div>
       <label htmlFor="my-modal-3" className="btn btn-accent"><Image src={mic} alt="Voice Input"/></label>
@@ -82,9 +88,6 @@ const AudioRecorder = (props) => {
             <button className="btn btn-accent btn-sm" onClick={stopRecording} disabled={!isRecording}>
               Stop Recording
             </button>
-            {/* <button type = "submit" className = "btn btn-accent btn-sm" onClick = {handleSubmit} disabled = {!audio}>
-              Generate
-            </button> */}
           </div>
           <div className="mt-10 flex justify-center">
             <audio src={blobURL} controls />
@@ -92,7 +95,7 @@ const AudioRecorder = (props) => {
           <p className="py-4">
             {!loading && transcription}
           </p>
-          <label htmlFor="my-modal-3" className="btn btn-accent btn-sm" disabled = {!audio}>Submit</label>
+          <button className="btn btn-accent btn-sm" onClick={handleSubmit}>Clear</button>
         </div>
       </div>
       {loading && <Loader />}

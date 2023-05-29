@@ -6,20 +6,6 @@
   background-color: #373747;
 }
 
-/* @media (prefers-color-scheme: dark) {
-  background-color: #373747;
-} 
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-} */
-
 html,
 body {
   padding: 0;

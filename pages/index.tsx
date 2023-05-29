@@ -7,6 +7,40 @@ interface Conversation {
   content: string;
 }
 
+const cleanText = (txtin: string) => {
+
+  txtin = txtin.replace(/\'m/g,` am`);
+  txtin = txtin.replace(/\'re/g,` are`);
+  txtin = txtin.replace(/\blet\'s\b/g,`let us`);
+  txtin = txtin.replace(/\'s/g,` is`);
+  txtin = txtin.replace(/ain\'t/g,` is not it`);
+  txtin = txtin.replace(/n\'t/g,` not`);
+  txtin = txtin.replace(/\'ll/g,` will`)
+  txtin = txtin.replace(/\'d/g,` would`);
+  txtin = txtin.replace(/\'ve/g,` have`);
+  txtin = txtin.replace(/\lemme/g,` let me`);
+  txtin = txtin.replace(/\gimme/g,` give me`);
+  txtin = txtin.replace(/\wanna/g,` want to`);
+  txtin = txtin.replace(/\gonna/g,` going to`);
+  txtin = txtin.replace(/r u /g,`are you`);
+  txtin = txtin.replace(/\bim\b/g,`i am`);
+  txtin = txtin.replace(/\bwhats\b/g,`what is`);
+  txtin = txtin.replace(/\bwheres\b/g,`where is`);
+  txtin = txtin.replace(/\bwhos\b/g,`who is`);
+  
+  txtin = txtin.replace(/(^\s*)|(\s*$)/gi,"");
+  txtin = txtin.replace(/[ ]{2,}/gi," ");
+  txtin = txtin.replace(/\n /,"\n");
+
+  const stopwordsymbols = ["+","-","*","%","/","?","!","^","'","\"",",",";","\\","."];
+  for (let i = 0; i < stopwordsymbols.length; i++)
+  {
+    var re = new RegExp("\\" + stopwordsymbols[i], 'g');
+    txtin = txtin.replace(re,"");
+  }
+  return txtin;
+}
+
 export default function Home() {
 
   const [isLoading, setLoading] = useState(false);
@@ -20,7 +54,7 @@ export default function Home() {
 
   const summarize = async (chat: string) => {
     
-    const input = await fetch("/api/textSummarizer", {
+    const input = await fetch("/api/cohereAISummary", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -28,18 +62,26 @@ export default function Home() {
       body: JSON.stringify({ text: chat }),
     });
     const text = await input.json();
-    console.log(text.result);
+
     return text.result;
   }
 
-  // const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
   const handleKeyDown = async () => {
 
-    if (value !== "") {
-      setLoading(true);
+    setLoading(true);
 
-      let chatHistory: Conversation[] = [...conversation, { role: "user", content: value }];
-      let chat: Conversation[] = [{ role: "system", content: "You are a travel assistant friend, who is a travel expert." }, ...chatHistory];
+    if (value !== "") {
+      let text = value;
+
+      text = cleanText(text);
+
+      if(text.split(' ').filter(String).length > 144) {
+        const trim: string = await summarize(text);
+        text = trim;
+      }
+      
+      let chatHistory: Conversation[] = [...conversation, { role: "user", content: text }];
+      let chat: Conversation[] = [{ role: "system", content: "You are EDA, a travel assistant friend, who is a travel expert. You will talk in a natural friendly manner." }, ...chatHistory];
       
       const tokenCount = await fetch("/api/countTokens", {
         method: "POST",
@@ -61,7 +103,12 @@ export default function Home() {
         }
         const userHistory: string = await summarize(userChat);
         const assistantHistory: string = await summarize(assistantChat);
-        chat = [{ role: "user", content: userHistory }, { role: "assistant", content: assistantHistory }, { role: "user", content: value }];
+        chat = [
+          { role: "system", content: "You are EDA, a travel assistant friend, who is a travel expert. You will talk in a natural friendly manner." },
+          { role: "user", content: userHistory },
+          { role: "assistant", content: assistantHistory },
+          { role: "user", content: value },
+        ];
         chatHistory = chat;
       }
 
@@ -113,7 +160,7 @@ export default function Home() {
               <React.Fragment key={index}>
                 <br />
                 {item.role === "assistant" ? (
-                  <div className="chat chat-end">
+                  <div className="chat chat-start">
                     <div className="chat-bubble chat-bubble-secondary">
                       <strong className="badge badge-primary">EDA</strong>
                       <br />
@@ -121,7 +168,7 @@ export default function Home() {
                     </div>
                   </div>
                 ) : (
-                  <div className="chat chat-start">
+                  <div className="chat chat-end">
                     <div className="chat-bubble chat-bubble-primary">
                       <strong className="badge badge-secondary">User</strong>
                       <br />
