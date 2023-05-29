@@ -145,11 +145,13 @@ export default function Home() {
     <div className="w-full">
       <div className="flex flex-col items-center justify-center w-2/3 mx-auto mt-40 text-center">
         <h1 className="text-6xl text-slate-300">Hi there, I am EDA</h1>
-        <div className="my-12 w-auto">
+        <div className="my-12 w-full">
           <div className="flex flex-col space-y-4 items-center w-auto">
             <p className="mb-6 font-bold text-slate-300">Please type your query</p>
-            <input placeholder="Type Here" className="w-full max-w-xs input input-bordered input-ghost" value={value} onChange={handleInput}/>
-            <AudioRecorder onTranscript={handleTranscript} />
+            <div className="flex flex-row space-x-10 justify-center items-center w-full">
+              <input placeholder="Type Here" className="w-full max-w-xs input input-bordered input-ghost" value={value} onChange={handleInput}/>
+              <AudioRecorder onTranscript={handleTranscript} />
+            </div>
             <button className="btn btn-sm btn-accent my-10" onClick={handleKeyDown}>Submit</button>
             <button className="mx-auto mt-6 btn btn-primary btn-xs" onClick={handleRefresh} >
               Start New Conversation
