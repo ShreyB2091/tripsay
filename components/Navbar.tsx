@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../logo.jpeg'
+import logo from '../logo.jpeg';
 import Image from 'next/image';
 
 export default function Navbar() {
@@ -9,5 +9,5 @@ export default function Navbar() {
         <Image src={logo} alt="TripSay" className="h-16 w-auto rounded-lg" />
       </div>
     </div>
-  )
+  );
 }
