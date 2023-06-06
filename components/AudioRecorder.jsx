@@ -6,7 +6,6 @@ import Image from 'next/image';
 
 const AudioRecorder = (props) => {
 
-  const [audio, setAudio] = useState();
   const [loading, setLoading] = useState(false);
   const [transcription, setTranscription] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -48,7 +47,6 @@ const AudioRecorder = (props) => {
       reader.onloadend = async function () {
         const base64data = reader.result;
         const base64String = base64data.split(',')[1];
-        setAudio(base64String);
         const response = await fetch('/api/openAIAudio', {
           method: 'POST',
           headers: {
@@ -68,7 +66,7 @@ const AudioRecorder = (props) => {
   }
   
   const handleSubmit = () => {
-    setAudio('');
+    setBlobURL("");
     setTranscription('');
     props.onTranscript('');
   }

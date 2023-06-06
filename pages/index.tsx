@@ -1,44 +1,11 @@
 import React, { useRef, useState, useCallback } from "react";
 import AudioRecorder from "@/components/AudioRecorder";
 import Loader from "@/components/Loader";
+const cleanText = require('./../app/cleanText');
 
 interface Conversation {
   role: string;
   content: string;
-}
-
-const cleanText = (txtin: string) => {
-
-  txtin = txtin.replace(/\'m/g,` am`);
-  txtin = txtin.replace(/\'re/g,` are`);
-  txtin = txtin.replace(/\blet\'s\b/g,`let us`);
-  txtin = txtin.replace(/\'s/g,` is`);
-  txtin = txtin.replace(/ain\'t/g,` is not it`);
-  txtin = txtin.replace(/n\'t/g,` not`);
-  txtin = txtin.replace(/\'ll/g,` will`)
-  txtin = txtin.replace(/\'d/g,` would`);
-  txtin = txtin.replace(/\'ve/g,` have`);
-  txtin = txtin.replace(/\lemme/g,` let me`);
-  txtin = txtin.replace(/\gimme/g,` give me`);
-  txtin = txtin.replace(/\wanna/g,` want to`);
-  txtin = txtin.replace(/\gonna/g,` going to`);
-  txtin = txtin.replace(/r u /g,`are you`);
-  txtin = txtin.replace(/\bim\b/g,`i am`);
-  txtin = txtin.replace(/\bwhats\b/g,`what is`);
-  txtin = txtin.replace(/\bwheres\b/g,`where is`);
-  txtin = txtin.replace(/\bwhos\b/g,`who is`);
-  
-  txtin = txtin.replace(/(^\s*)|(\s*$)/gi,"");
-  txtin = txtin.replace(/[ ]{2,}/gi," ");
-  txtin = txtin.replace(/\n /,"\n");
-
-  const stopwordsymbols = ["+","-","*","%","/","?","!","^","'","\"",",",";","\\","."];
-  for (let i = 0; i < stopwordsymbols.length; i++)
-  {
-    var re = new RegExp("\\" + stopwordsymbols[i], 'g');
-    txtin = txtin.replace(re,"");
-  }
-  return txtin;
 }
 
 export default function Home() {
@@ -94,7 +61,7 @@ export default function Home() {
       console.log(tokens.result);
       const numTokens = tokens.result;
 
-      if(numTokens + 256 > 4096) {
+      if(numTokens + 512 > 4096) {
         chat = chatHistory;
         let userChat = '', assistantChat = '';
         for(const item of chat) {
@@ -143,7 +110,7 @@ export default function Home() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col items-center justify-center w-2/3 mx-auto mt-40 text-center">
+      <div className="flex flex-col items-center justify-center w-2/3 mx-auto mt-20 text-center">
         <h1 className="text-6xl text-slate-300">Hi there, I am EDA</h1>
         <div className="my-12 w-full">
           <div className="flex flex-col space-y-4 items-center w-auto">
